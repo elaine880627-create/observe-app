@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Observe | 観察する</title>
+    <meta name="description" content="日常を再発見するための、静かな観察アプリ。">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Onboarding Screen -->
+        <section id="onboarding-screen" class="screen">
+            <div class="onboarding-bg" style="background-image: url('assets/onboarding_bg.png');"></div>
+            <div class="onboarding-content">
+                <div class="logo-container">
+                    <h1 class="serif">Observe</h1>
+                    <p>オブザーブ</p>
+                </div>
+                <div class="onboarding-quote serif">
+                    <p>立ち止まり、見つめる。<br>それだけで、世界は変わり始める。</p>
+                </div>
+                <button id="start-btn" class="btn-start">はじめる</button>
+            </div>
+        </section>
+
+        <!-- Main Header (shared) -->
+        <header id="app-header" class="hidden">
+            <div class="poetic-label">observing quietly</div>
+        </header>
+
+        <!-- Home Screen -->
+        <section id="home-screen" class="screen hidden">
+            <main class="theme-section">
+                <p class="theme-label">今日の観察テーマ</p>
+                <div class="theme-card">
+                    <p id="theme-display" class="theme-text serif">今日、最も孤独に見えたものを<br>観察してください</p>
+                </div>
+                <button class="btn-record-main" id="record-btn-trigger" aria-label="記録する">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4V20M4 12L20 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </main>
+        </section>
+
+        <!-- History Screen -->
+        <section id="history-screen" class="screen hidden">
+            <div id="history-list" class="history-grid">
+                <!-- Records will be injected here -->
+            </div>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav" class="bottom-nav hidden">
+            <div class="nav-item active" data-screen="home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3L21 9.5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V9.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>ホーム</span>
+            </div>
+            <div class="nav-item" data-screen="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16m-7 6h7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>履歴</span>
+            </div>
+        </nav>
+
+        <!-- Selection Modal -->
+        <div id="selection-modal" class="modal-overlay">
+            <ul class="modal-menu">
+                <li id="opt-camera">写真を撮る</li>
+                <li id="opt-gallery">写真を選択</li>
+                <li id="opt-text">テキストのみ</li>
+            </ul>
+            <button id="close-selection" class="btn-close-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <!-- Preview Overlay -->
+        <div id="preview-overlay" class="preview-overlay">
+            <div class="preview-header">
+                <button id="cancel-preview" style="background:none; border:none; color:var(--text-sub); font-size: 0.8rem; letter-spacing: 0.1em;">キャンセル</button>
+                <div class="serif" style="font-size: 0.9rem;">観察を記す</div>
+                <div style="width: 60px;"></div>
+            </div>
+            <div class="preview-image-container" id="preview-img-box">
+                <img id="preview-img" src="" alt="Preview">
+            </div>
+            <div class="preview-content">
+                <p class="preview-theme-label">観察テーマ</p>
+                <p id="preview-theme-text" class="preview-theme-text serif"></p>
+                <textarea id="memo-input" class="record-input" placeholder="今日の観察を書いてください"></textarea>
+                <button id="save-observation" class="btn-save">保存する</button>
+            </div>
+        </div>
+
+        <!-- Detail Overlay -->
+        <div id="detail-overlay" class="detail-overlay">
+            <div class="detail-header">
+                <button id="close-detail" style="background:none; border:none; color:var(--text-sub);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                <div class="serif" style="font-size: 0.9rem;">観察の記憶</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <div id="detail-img-container" class="detail-image-container">
+                <img id="detail-img" src="" alt="Detail">
+            </div>
+            <div class="detail-content">
+                <div class="detail-theme-box">
+                    <p class="detail-theme-label">観察テーマ</p>
+                    <p id="detail-theme" class="detail-theme-text"></p>
+                </div>
+                <p id="detail-memo" class="detail-memo"></p>
+                <p id="detail-date" class="detail-date"></p>
+            </div>
+        </div>
+
+        <!-- Hidden Inputs -->
+        <input type="file" id="input-camera" class="hidden-input" accept="image/*" capture="environment">
+        <input type="file" id="input-gallery" class="hidden-input" accept="image/*">
+
+        <!-- Error Toast -->
+        <div id="error-toast" class="error-toast">写真を読み込めませんでした</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
