@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const themes = [
         "今日、最も孤独に見えたものを観察してください",
         "今日は“音”だけで世界を見てください",
+        "最も静かな場所を探してください",
+        "誰にも気づかれていない色を見つけてください",
         "コンビニを美術館として観察してください",
         "空の「青」が何種類あるか数えてみてください",
         "誰にも気づかれない小さな美しさを見つけてください",
@@ -66,22 +68,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const getTodayTheme = () => {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        const stored = localStorage.getItem('observe_today_theme');
+        // 1. 今日の日付をローカルタイムで YYYY-MM-DD 形式で取得
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const today = `${year}-${month}-${day}`;
+
+        // 2. localStorage の theme_date を確認
+        const savedDate = localStorage.getItem('theme_date');
+        const savedTheme = localStorage.getItem('today_theme');
         
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed.date === today) {
-                return parsed.theme;
-            }
+        // 3. 同じ日なら保存済みテーマを使う
+        if (savedDate === today && savedTheme) {
+            return savedTheme;
         }
 
+        // 4. 違う日なら新しいテーマをランダム生成
         const randomIndex = Math.floor(Math.random() * themes.length);
         const newTheme = themes[randomIndex];
-        localStorage.setItem('observe_today_theme', JSON.stringify({
-            date: today,
-            theme: newTheme
-        }));
+        
+        // 5. 新しいテーマと今日の日付を保存
+        localStorage.setItem('theme_date', today);
+        localStorage.setItem('today_theme', newTheme);
+        
         return newTheme;
     };
 
