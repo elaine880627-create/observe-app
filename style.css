@@ -351,14 +351,18 @@ header {
 
 /* History Screen - Masonry Layout */
 #history-screen {
-    padding: var(--spacing-m);
+    display: block; /* Override display: flex to let CSS multi-columns layout and height calculation work perfectly */
+    padding: var(--spacing-m) var(--spacing-m) 120px; /* Keep bottom padding large enough to clear bottom nav */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Momentum scrolling for iOS */
 }
 
 .history-grid {
     columns: 2;
     column-gap: var(--spacing-m);
     padding-top: var(--spacing-s);
+    width: 100%;
+    max-width: 100%;
 }
 
 .history-item {
@@ -423,6 +427,36 @@ header {
     font-size: 0.6rem;
     color: #ccc;
     letter-spacing: 0.05em;
+}
+
+.btn-post-options {
+    background: none;
+    border: none;
+    color: var(--text-sub);
+    cursor: pointer;
+    padding: 4px;
+    margin: -4px -4px 0 0;
+    transition: color var(--transition-mid);
+}
+
+.btn-post-options:active {
+    color: var(--text-main);
+}
+
+.btn-edit-action {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform var(--transition-mid);
+}
+
+.btn-edit-action:active {
+    transform: scale(0.95);
 }
 
 /* Detail Modal */

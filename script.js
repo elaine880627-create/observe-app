@@ -31,9 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailMemo = document.getElementById('detail-memo');
     const detailDate = document.getElementById('detail-date');
 
+    // Post Action & Edit Elements
+    const postActionModal = document.getElementById('post-action-modal');
+    const closePostAction = document.getElementById('close-post-action');
+    const optEdit = document.getElementById('opt-edit');
+    const optDelete = document.getElementById('opt-delete');
+    
+    const editOverlay = document.getElementById('edit-overlay');
+    const cancelEdit = document.getElementById('cancel-edit');
+    const editImgBox = document.getElementById('edit-img-box');
+    const editNoPhotoBox = document.getElementById('edit-no-photo-box');
+    const editImg = document.getElementById('edit-img');
+    const editChangePhoto = document.getElementById('edit-change-photo');
+    const editRemovePhoto = document.getElementById('edit-remove-photo');
+    const editAddPhoto = document.getElementById('edit-add-photo');
+    const editDate = document.getElementById('edit-date');
+    const editThemeText = document.getElementById('edit-theme-text');
+    const editMemoInput = document.getElementById('edit-memo-input');
+    const saveEditObservation = document.getElementById('save-edit-observation');
+
     // Hidden Inputs
     const inputCamera = document.getElementById('input-camera');
     const inputGallery = document.getElementById('input-gallery');
+    const inputEditPhoto = document.getElementById('input-edit-photo');
 
     const themes = [
         "今日、最も孤独に見えたものを観察してください",
@@ -50,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentTheme = "";
     let currentImageBase64 = null;
+    let activePostId = null;
+    let editImageBase64 = null;
 
     // --- Core Functions ---
 
@@ -111,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Image Processing ---
 
-    const processImage = (file) => {
+    const processImage = (file, isEdit = false) => {
         try {
             if (!file) return;
             const reader = new FileReader();
@@ -136,10 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    previewImg.src = currentImageBase64;
-                    previewImgBox.style.display = 'flex';
-                    openPreview();
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
+                    if (isEdit) {
+                        editImageBase64 = base64;
+                        editImg.src = base64;
+                        editImgBox.style.display = 'flex';
+                        editNoPhotoBox.style.display = 'none';
+                    } else {
+                        currentImageBase64 = base64;
+                        previewImg.src = base64;
+                        previewImgBox.style.display = 'flex';
+                        openPreview();
+                    }
                 };
                 img.onerror = () => showToast("写真を読み込めませんでした");
                 img.src = e.target.result;
@@ -179,6 +209,39 @@ document.addEventListener('DOMContentLoaded', () => {
         detailOverlay.classList.add('active');
     };
 
+    const openPostAction = (id) => {
+        activePostId = id;
+        postActionModal.classList.add('active');
+    };
+
+    const openEditOverlay = () => {
+        const records = JSON.parse(localStorage.getItem('observe_records') || '[]');
+        const record = records.find(r => r.id === activePostId);
+        if (!record) return;
+
+        editThemeText.innerHTML = record.theme;
+        editDate.textContent = record.date;
+        editMemoInput.value = record.memo || '';
+        editImageBase64 = record.image || null;
+
+        if (editImageBase64) {
+            editImg.src = editImageBase64;
+            editImgBox.style.display = 'flex';
+            editNoPhotoBox.style.display = 'none';
+        } else {
+            editImgBox.style.display = 'none';
+            editNoPhotoBox.style.display = 'flex';
+        }
+
+        editOverlay.classList.add('active');
+    };
+
+    const closeEditOverlay = () => {
+        editOverlay.classList.remove('active');
+        activePostId = null;
+        editImageBase64 = null;
+    };
+
     // --- Data Management ---
 
     const saveToLocalStorage = () => {
@@ -202,9 +265,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const saveEdit = () => {
+        try {
+            let records = JSON.parse(localStorage.getItem('observe_records') || '[]');
+            const index = records.findIndex(r => r.id === activePostId);
+            if (index > -1) {
+                records[index].memo = editMemoInput.value;
+                records[index].image = editImageBase64;
+                localStorage.setItem('observe_records', JSON.stringify(records));
+                showToast("編集を保存しました");
+                closeEditOverlay();
+                renderHistory();
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("保存に失敗しました。");
+        }
+    };
+
+    const deletePost = () => {
+        if (!confirm("この記録を削除しますか？")) return;
+        try {
+            let records = JSON.parse(localStorage.getItem('observe_records') || '[]');
+            records = records.filter(r => r.id !== activePostId);
+            localStorage.setItem('observe_records', JSON.stringify(records));
+            showToast("記録を削除しました");
+            postActionModal.classList.remove('active');
+            renderHistory();
+        } catch (err) {
+            console.error(err);
+            showToast("削除に失敗しました。");
+        }
+    };
+
     const renderHistory = () => {
         try {
-            const records = JSON.parse(localStorage.getItem('observe_records') || '[]');
+            let records = JSON.parse(localStorage.getItem('observe_records') || '[]');
+            
+            // Add IDs to legacy records
+            let modified = false;
+            records.forEach(record => {
+                if (!record.id) {
+                    record.id = Math.random().toString(36).substr(2, 9);
+                    modified = true;
+                }
+            });
+            if (modified) {
+                localStorage.setItem('observe_records', JSON.stringify(records));
+            }
+
             if (records.length === 0) {
                 historyList.innerHTML = '<p class="theme-label" style="text-align: center; width: 100%; margin-top: 40px; grid-column: span 2;">まだ記録がありません</p>';
                 return;
@@ -217,14 +326,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.innerHTML = `
                     ${record.image ? `<img src="${record.image}" class="history-item-image" loading="lazy">` : ''}
                     <div class="history-item-content">
-                        <p class="history-item-memo">${record.memo || '（メモなし）'}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <p class="history-item-memo" style="flex: 1; margin-right: 8px;">${record.memo || '（メモなし）'}</p>
+                            <button class="btn-post-options" aria-label="オプション" data-id="${record.id}">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                            </button>
+                        </div>
                         <div class="history-item-meta">
                             <span class="history-item-theme">${record.theme.replace('<br>', ' ')}</span>
                             <span class="history-item-date">${record.date}</span>
                         </div>
                     </div>
                 `;
-                item.onclick = () => openDetail(record);
+                item.onclick = (e) => {
+                    const btn = e.target.closest('.btn-post-options');
+                    if (btn) {
+                        e.stopPropagation();
+                        openPostAction(record.id);
+                    } else {
+                        openDetail(record);
+                    }
+                };
                 historyList.appendChild(item);
             });
         } catch (err) {
@@ -269,6 +391,38 @@ document.addEventListener('DOMContentLoaded', () => {
     saveObservation.addEventListener('click', saveToLocalStorage);
 
     closeDetail.addEventListener('click', () => detailOverlay.classList.remove('active'));
+
+    // Post Action & Edit Event Listeners
+    closePostAction.addEventListener('click', () => {
+        postActionModal.classList.remove('active');
+        activePostId = null;
+    });
+
+    optEdit.addEventListener('click', () => {
+        postActionModal.classList.remove('active');
+        openEditOverlay();
+    });
+
+    optDelete.addEventListener('click', deletePost);
+
+    cancelEdit.addEventListener('click', closeEditOverlay);
+    saveEditObservation.addEventListener('click', saveEdit);
+
+    editChangePhoto.addEventListener('click', () => inputEditPhoto.click());
+    editAddPhoto.addEventListener('click', () => inputEditPhoto.click());
+    
+    inputEditPhoto.addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            processImage(e.target.files[0], true);
+        }
+    });
+
+    editRemovePhoto.addEventListener('click', () => {
+        editImageBase64 = null;
+        editImgBox.style.display = 'none';
+        editNoPhotoBox.style.display = 'flex';
+        inputEditPhoto.value = '';
+    });
 
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {

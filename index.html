@@ -75,6 +75,17 @@
             </button>
         </div>
 
+        <!-- Post Action Modal (Edit/Delete) -->
+        <div id="post-action-modal" class="modal-overlay">
+            <ul class="modal-menu">
+                <li id="opt-edit">編集</li>
+                <li id="opt-delete" style="color: #ff6b6b;">削除</li>
+            </ul>
+            <button id="close-post-action" class="btn-close-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
         <!-- Preview Overlay -->
         <div id="preview-overlay" class="preview-overlay">
             <div class="preview-header">
@@ -90,6 +101,34 @@
                 <p id="preview-theme-text" class="preview-theme-text serif"></p>
                 <textarea id="memo-input" class="record-input" placeholder="今日の観察を書いてください"></textarea>
                 <button id="save-observation" class="btn-save">保存する</button>
+            </div>
+        </div>
+
+        <!-- Edit Overlay -->
+        <div id="edit-overlay" class="preview-overlay">
+            <div class="preview-header">
+                <button id="cancel-edit" style="background:none; border:none; color:var(--text-sub); font-size: 0.8rem; letter-spacing: 0.1em;">キャンセル</button>
+                <div class="serif" style="font-size: 0.9rem;">記録の編集</div>
+                <div style="width: 60px;"></div>
+            </div>
+            <div class="preview-image-container" id="edit-img-box" style="position: relative;">
+                <img id="edit-img" src="" alt="Edit">
+                <div style="position: absolute; bottom: 20px; display: flex; gap: 10px; justify-content: center; width: 100%;">
+                    <button id="edit-change-photo" class="btn-edit-action">写真を変更</button>
+                    <button id="edit-remove-photo" class="btn-edit-action" style="color: #ff6b6b;">削除</button>
+                </div>
+            </div>
+            <div id="edit-no-photo-box" class="preview-image-container" style="display: none; background: #f0f0f0;">
+                <button id="edit-add-photo" class="btn-edit-action" style="margin: auto;">写真を追加</button>
+            </div>
+            <div class="preview-content">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--spacing-s);">
+                    <p class="preview-theme-label" style="margin-bottom: 0;">観察テーマ</p>
+                    <p id="edit-date" style="font-size: 0.7rem; color: var(--text-sub);"></p>
+                </div>
+                <p id="edit-theme-text" class="preview-theme-text serif"></p>
+                <textarea id="edit-memo-input" class="record-input" placeholder="今日の観察を書いてください"></textarea>
+                <button id="save-edit-observation" class="btn-save">保存する</button>
             </div>
         </div>
 
@@ -116,6 +155,7 @@
         <!-- Hidden Inputs -->
         <input type="file" id="input-camera" class="hidden-input" accept="image/*" capture="environment">
         <input type="file" id="input-gallery" class="hidden-input" accept="image/*">
+        <input type="file" id="input-edit-photo" class="hidden-input" accept="image/*">
 
         <!-- Error Toast -->
         <div id="error-toast" class="error-toast">写真を読み込めませんでした</div>
