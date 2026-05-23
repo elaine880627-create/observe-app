@@ -56,16 +56,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputEditPhoto = document.getElementById('input-edit-photo');
 
     const themes = [
-        "今日、最も孤独に見えたものを観察してください",
-        "今日は“音”だけで世界を見てください",
-        "最も静かな場所を探してください",
-        "誰にも気づかれていない色を見つけてください",
-        "コンビニを美術館として観察してください",
-        "空の「青」が何種類あるか数えてみてください",
-        "誰にも気づかれない小さな美しさを見つけてください",
-        "歩くときの足の裏の感覚を1分間だけ観察してください",
-        "街の中にある「不自然な直線」を探してみてください",
-        "影の輪郭がどこで消えているか観察してください"
+        "影の輪郭がどこで消えているか観察してください<br><span class=\"theme-translation\">Observe where the outlines of shadows disappear.</span>",
+        "今日は“音”だけで世界を見てください<br><span class=\"theme-translation\">Look at the world today using only \"sound.\"</span>",
+        "最も静かな場所を探してください<br><span class=\"theme-translation\">Seek out the quietest place you can find.</span>",
+        "誰にも気づかれていない色を見つけてください<br><span class=\"theme-translation\">Find a color that has gone unnoticed by everyone.</span>",
+        "コンビニを美術館として観察してください<br><span class=\"theme-translation\">Observe a convenience store as if it were an art museum.</span>",
+        "空の「青」が何種類あるか数えてみてください<br><span class=\"theme-translation\">Count how many kinds of \"blue\" are in the sky.</span>",
+        "誰にも気づかれない小さな美しさを見つけてください<br><span class=\"theme-translation\">Discover a tiny, unnoticed beauty.</span>",
+        "歩くときの足の裏の感覚を1分間だけ観察してください<br><span class=\"theme-translation\">Observe the sensation on the soles of your feet for just one minute as you walk.</span>",
+        "街の中にある「不自然な直線」を探してみてください<br><span class=\"theme-translation\">Look for \"unnatural straight lines\" in the city.</span>",
+        "今日、最も孤独に見えたものを観察してください<br><span class=\"theme-translation\">Observe the thing that looked the most lonely today.</span>",
+        "街の雑踏の中で、一つの足音だけを追いかけてください<br><span class=\"theme-translation\">Follow just a single set of footsteps in the city crowd.</span>",
+        "コップの水に映る、小さな部屋の表情を眺めてください<br><span class=\"theme-translation\">Look at the expression of your room reflected in a glass of water.</span>",
+        "風が通るたび、木々の葉がどんな声を上げているか聴いてください<br><span class=\"theme-translation\">Listen to the voices the leaves make each time the wind passes.</span>",
+        "夕暮れ時の窓が、街の灯りを吸い込んでいく様子を見つめてください<br><span class=\"theme-translation\">Watch the twilight window absorb the lights of the city.</span>",
+        "電車で隣り合った人の、呼吸のテンポをそっと感じてみてください<br><span class=\"theme-translation\">Gently sense the breathing rhythm of the person sitting next to you on the train.</span>",
+        "雨粒が地面に触れて、消えていく瞬間の形を想像してください<br><span class=\"theme-translation\">Imagine the shape of a raindrop at the exact moment it touches the ground and vanishes.</span>",
+        "部屋の中で、一番温かい光がたまっている場所を探してください<br><span class=\"theme-translation\">Find the place in your room where the warmest light pools.</span>",
+        "あなたの影が、あなたより少し遅れて動くように感じてみてください<br><span class=\"theme-translation\">Try to feel as if your shadow moves just a split second behind you.</span>",
+        "すれ違った見知らぬ人の、短い一言だけを記憶に残してください<br><span class=\"theme-translation\">Keep just a single short word from a passing stranger in your memory.</span>",
+        "アスファルトの隙間から伸びる、名もなき草の強さを測ってください<br><span class=\"theme-translation\">Measure the strength of nameless grass growing from a crack in the asphalt.</span>",
+        "コンビニの自動ドアが開くときの、わずかな風の匂いを嗅いでください<br><span class=\"theme-translation\">Catch the scent of the gentle breeze when a convenience store door slides open.</span>",
+        "雲がちぎれて、青空に溶けていく境界線を見守ってください<br><span class=\"theme-translation\">Watch the boundary where a cloud breaks apart and melts into the blue sky.</span>",
+        "古い建物の壁のひび割れが、どんな地図に見えるか考えてください<br><span class=\"theme-translation\">Ponder what kind of map the cracks on an old building's wall look like.</span>",
+        "今日の街の中で、最も「ゆっくり」動いていたものを追ってください<br><span class=\"theme-translation\">Follow the thing that was moving the most \"slowly\" in the city today.</span>",
+        "電車の窓ガラスを流れていく、並行な雨の線を眺めてください<br><span class=\"theme-translation\">Watch the parallel lines of rain flowing down the train window.</span>",
+        "あなたの机の上の、ものとものの間にある「余白」を意識してください<br><span class=\"theme-translation\">Be aware of the \"blank space\" between objects on your desk.</span>",
+        "夕暮れが、世界のすべてを同じ色に染めていくプロセスを観察してください<br><span class=\"theme-translation\">Observe the process of twilight dyeing everything in the world the same color.</span>",
+        "あなたの声が、部屋の壁に当たって跳ね返る気配を感じてください<br><span class=\"theme-translation\">Feel the presence of your own voice bouncing off the walls of the room.</span>",
+        "街灯の下で、光と闇が静かに交差しているスポットを探してください<br><span class=\"theme-translation\">Look for a spot under a streetlamp where light and darkness quietly intersect.</span>",
+        "呼吸を深くするたび、肺の中に入ってくる冷たさを味わってください<br><span class=\"theme-translation\">Savor the coolness that enters your lungs with each deep breath.</span>",
+        "人々がスマートフォンを見つめる、その指先の無意識の動きを観察してください<br><span class=\"theme-translation\">Observe the unconscious movement of fingers as people stare at their smartphones.</span>",
+        "カーテンが風に膨らむとき、そこに隠された形を想像してください<br><span class=\"theme-translation\">Imagine the hidden shape when the curtain swells in the wind.</span>",
+        "信号を待つ人々が、青に変わる直前に見せる「静かな気配」を感じてください<br><span class=\"theme-translation\">Sense the \"quiet anticipation\" shown by people waiting for the light to turn green.</span>",
+        "錆びついた鉄の匂いから、そこにあった時間を想像してください<br><span class=\"theme-translation\">Imagine the time that passed from the scent of rusted iron.</span>",
+        "今日、あなたの身の回りで最も「古い」と感じるものに触れてください<br><span class=\"theme-translation\">Touch the thing around you today that feels the oldest.</span>",
+        "水たまりに映る空が、通り過ぎる車に揺らされる様子を見てください<br><span class=\"theme-translation\">Watch the sky reflected in a puddle shaken by a passing car.</span>",
+        "今日は、あなたの背後から聞こえる音だけに耳を澄ましてください<br><span class=\"theme-translation\">Listen carefully today only to the sounds coming from behind you.</span>",
+        "階段を上る人々の、かかとの動きだけをしばらく見つめてください<br><span class=\"theme-translation\">Stare for a while only at the movement of heels as people climb the stairs.</span>",
+        "日没の直後、空が一番深く、優しいグラデーションになる瞬間を見逃さないでください<br><span class=\"theme-translation\">Don't miss the moment right after sunset when the sky forms its deepest, gentlest gradient.</span>",
+        "あなたの手のひらの温かさが、触れたものに乗り移る様子を観察してください<br><span class=\"theme-translation\">Observe how the warmth of your palm transfers to the things you touch.</span>",
+        "今日出会った「最も遠い音」と「最も近い音」の距離を感じてください<br><span class=\"theme-translation\">Feel the distance between the \"farthest sound\" and the \"nearest sound\" you encountered today.</span>",
+        "古いベンチの木目の、波のようなうねりを指でなぞってください<br><span class=\"theme-translation\">Trace the wave-like ripples of an old wooden bench's grain with your finger.</span>",
+        "自動販売機の明かりが、夜の空気の中に放つ静かな存在感を観察してください<br><span class=\"theme-translation\">Observe the quiet presence that a vending machine's light emits in the night air.</span>",
+        "鳥が空を切って飛ぶときの、目に見えない軌跡を追いかけてください<br><span class=\"theme-translation\">Follow the invisible path left by a bird as it cuts through the sky.</span>",
+        "誰かが去ったあとの椅子の、まだ残っているかすかな温もりを感じてください<br><span class=\"theme-translation\">Feel the faint, remaining warmth of a chair after someone has left.</span>",
+        "コーヒーの湯気が、空気の中にゆっくりと消えていくダンスを観察してください<br><span class=\"theme-translation\">Observe the dance of coffee steam as it slowly dissolves into the air.</span>",
+        "駅の改札を通る人々の、足取りのリズムが作り出す音楽を聴いてください<br><span class=\"theme-translation\">Listen to the music created by the rhythm of footsteps passing through the station gates.</span>",
+        "街の中にある、用途のわからない不思議な隙間を見つけてください<br><span class=\"theme-translation\">Find a mysterious gap in the city whose purpose is completely unknown.</span>",
+        "雨の日、傘の骨から滴り落ちる水のしずくの間隔を数えてください<br><span class=\"theme-translation\">Count the intervals between water droplets dripping from the ribs of your umbrella on a rainy day.</span>",
+        "眠りにつく前の静けさの中で、あなたの心臓の静かなリズムを聴いてください<br><span class=\"theme-translation\">In the silence before falling asleep, listen to the quiet rhythm of your heart.</span>"
     ];
 
     let currentTheme = "";
@@ -106,13 +146,55 @@ document.addEventListener('DOMContentLoaded', () => {
             return savedTheme;
         }
 
-        // 4. 違う日なら新しいテーマをランダム生成
-        const randomIndex = Math.floor(Math.random() * themes.length);
-        const newTheme = themes[randomIndex];
-        
+        // 4. 違う日なら新しいテーマを選ぶ
+        let history = [];
+        try {
+            history = JSON.parse(localStorage.getItem('used_themes_history') || '[]');
+        } catch (e) {
+            history = [];
+        }
+
+        // 30日分だけ残す
+        if (history.length > 30) {
+            history = history.slice(-30);
+        }
+
+        // 直近30日以内に使ったテーマを抽出
+        const recentlyUsedThemes = history.map(h => h.theme);
+
+        // まだ使われていないテーマを候補とする
+        const unusedThemes = themes.filter(t => !recentlyUsedThemes.includes(t));
+
+        let newTheme = "";
+        if (unusedThemes.length > 0) {
+            // 未使用のテーマがあればランダムで選択
+            const randomIndex = Math.floor(Math.random() * unusedThemes.length);
+            newTheme = unusedThemes[randomIndex];
+        } else {
+            // すべて使われている場合は、一番古い日付（最近使っていないもの）を選択（Least Recently Used）
+            let oldestIndex = Infinity;
+            let leastRecentlyUsedTheme = themes[0];
+
+            themes.forEach(theme => {
+                const lastIndex = recentlyUsedThemes.lastIndexOf(theme);
+                if (lastIndex < oldestIndex) {
+                    oldestIndex = lastIndex;
+                    leastRecentlyUsedTheme = theme;
+                }
+            });
+            newTheme = leastRecentlyUsedTheme;
+        }
+
         // 5. 新しいテーマと今日の日付を保存
         localStorage.setItem('theme_date', today);
         localStorage.setItem('today_theme', newTheme);
+        
+        // 6. 履歴に追加して30日分だけ保存
+        history.push({ date: today, theme: newTheme });
+        if (history.length > 30) {
+            history = history.slice(-30);
+        }
+        localStorage.setItem('used_themes_history', JSON.stringify(history));
         
         return newTheme;
     };
@@ -324,14 +406,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.innerHTML = `
+                    <button class="btn-post-options" aria-label="オプション" data-id="${record.id}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                    </button>
                     ${record.image ? `<img src="${record.image}" class="history-item-image" loading="lazy">` : ''}
                     <div class="history-item-content">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <p class="history-item-memo" style="flex: 1; margin-right: 8px;">${record.memo || '（メモなし）'}</p>
-                            <button class="btn-post-options" aria-label="オプション" data-id="${record.id}">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                            </button>
-                        </div>
+                        <p class="history-item-memo">${record.memo || '（メモなし）'}</p>
                         <div class="history-item-meta">
                             <span class="history-item-theme">${record.theme.replace('<br>', ' ')}</span>
                             <span class="history-item-date">${record.date}</span>
