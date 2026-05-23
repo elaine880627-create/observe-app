@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeDisplay = document.getElementById('theme-display');
     const historyList = document.getElementById('history-list');
 
+    // Settings & Reminder Elements
+    const settingsScreen = document.getElementById('settings-screen');
+    const notificationToggle = document.getElementById('notification-toggle');
+    const notificationTimeSelect = document.getElementById('notification-time-select');
+    const inAppReminderToggle = document.getElementById('in-app-reminder-toggle');
+    const inAppReminderBanner = document.getElementById('in-app-reminder-banner');
+    const closeReminderBanner = document.getElementById('close-reminder-banner');
+
     // Modal/Overlay Elements
     const recordBtnTrigger = document.getElementById('record-btn-trigger');
     const selectionModal = document.getElementById('selection-modal');
@@ -36,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePostAction = document.getElementById('close-post-action');
     const optEdit = document.getElementById('opt-edit');
     const optDelete = document.getElementById('opt-delete');
-    
+
     const editOverlay = document.getElementById('edit-overlay');
     const cancelEdit = document.getElementById('cancel-edit');
     const editImgBox = document.getElementById('edit-img-box');
@@ -130,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const getTodayTheme = () => {
-        // 1. 今日の日付をローカルタイムで YYYY-MM-DD 形式で取得
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -140,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. localStorage の theme_date を確認
         const savedDate = localStorage.getItem('theme_date');
         const savedTheme = localStorage.getItem('today_theme');
-        
+
         // 3. 同じ日なら保存済みテーマを使う
         if (savedDate === today && savedTheme) {
             return savedTheme;
@@ -188,28 +195,33 @@ document.addEventListener('DOMContentLoaded', () => {
         // 5. 新しいテーマと今日の日付を保存
         localStorage.setItem('theme_date', today);
         localStorage.setItem('today_theme', newTheme);
-        
+
         // 6. 履歴に追加して30日分だけ保存
         history.push({ date: today, theme: newTheme });
         if (history.length > 30) {
             history = history.slice(-30);
         }
         localStorage.setItem('used_themes_history', JSON.stringify(history));
-        
+
         return newTheme;
     };
 
     const switchScreen = (screenId) => {
-        [homeScreen, historyScreen].forEach(s => s.classList.add('hidden'));
+        [homeScreen, historyScreen, settingsScreen].forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        
+
         if (screenId === 'home') {
             homeScreen.classList.remove('hidden');
             document.querySelector('[data-screen="home"]').classList.add('active');
+            checkInAppReminder();
         } else if (screenId === 'history') {
             historyScreen.classList.remove('hidden');
             document.querySelector('[data-screen="history"]').classList.add('active');
             renderHistory();
+        } else if (screenId === 'settings') {
+            settingsScreen.classList.remove('hidden');
+            document.querySelector('[data-screen="settings"]').classList.add('active');
+            updateNotificationStatusUI();
         }
     };
 
@@ -383,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderHistory = () => {
         try {
             let records = JSON.parse(localStorage.getItem('observe_records') || '[]');
-            
+
             // Add IDs to legacy records
             let modified = false;
             records.forEach(record => {
@@ -432,6 +444,97 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error(err);
             showToast("履歴の読み込みに失敗しました");
+        }
+    };
+
+    // --- Reminder & Notification Functions ---
+
+    const showLocalNotification = (title, body) => {
+        try {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then((registration) => {
+                    registration.showNotification(title, {
+                        body: body,
+                        icon: 'icon-192.png',
+                        badge: 'icon-192.png',
+                        vibrate: [100, 50, 100],
+                        data: { url: window.location.href }
+                    });
+                });
+            } else {
+                new Notification(title, { body: body });
+            }
+        } catch (e) {
+            console.error("Local notification display failed:", e);
+        }
+    };
+
+    const updateNotificationStatusUI = () => {
+        const isSupported = 'Notification' in window;
+        const permission = isSupported ? Notification.permission : 'denied';
+
+        const statusBox = document.getElementById('settings-status-box');
+        const statusText = document.getElementById('settings-status-text');
+        const timeRow = document.getElementById('notification-time-row');
+
+        const isEnabled = localStorage.getItem('notification_enabled') === 'true';
+        notificationToggle.checked = isEnabled;
+        notificationTimeSelect.value = localStorage.getItem('notification_time') || '21:00';
+        timeRow.style.display = isEnabled ? 'flex' : 'none';
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        statusBox.style.display = 'block';
+
+        if (!isSupported) {
+            if (isIOS) {
+                statusText.innerHTML = 'iPhoneをご利用の場合、<strong>「ホーム画面に追加」して起動する</strong>ことで、通知の受け取りや設定が可能になります。';
+            } else {
+                statusText.textContent = 'お使いのブラウザは通知機能に対応していません。代わりにアプリ内リマインダーをご利用ください。';
+            }
+            notificationToggle.disabled = true;
+        } else {
+            notificationToggle.disabled = false;
+            if (permission === 'default') {
+                statusText.textContent = '通知：設定されていません。上のスイッチをONにすると許可画面が開きます。';
+            } else if (permission === 'granted') {
+                statusText.textContent = '通知：許可されています。設定された時間にリマインドをお届けします。';
+            } else if (permission === 'denied') {
+                statusText.innerHTML = '通知：ブロックされています。端末の設定画面から通知の権限を許可してください。';
+            }
+        }
+    };
+
+    const checkInAppReminder = () => {
+        const enabled = localStorage.getItem('in_app_reminder_enabled') !== 'false';
+        inAppReminderToggle.checked = enabled;
+
+        if (!enabled) {
+            inAppReminderBanner.style.display = 'none';
+            return;
+        }
+
+        const dismissedDate = localStorage.getItem('in_app_reminder_dismissed_date');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const today = `${year}-${month}-${day}`;
+
+        if (dismissedDate === today) {
+            inAppReminderBanner.style.display = 'none';
+            return;
+        }
+
+        const notifTime = localStorage.getItem('notification_time') || '21:00';
+        const [hours, minutes] = notifTime.split(':').map(Number);
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+
+        if (currentHours > hours || (currentHours === hours && currentMinutes >= minutes)) {
+            inAppReminderBanner.style.display = 'flex';
+        } else {
+            inAppReminderBanner.style.display = 'none';
         }
     };
 
@@ -490,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editChangePhoto.addEventListener('click', () => inputEditPhoto.click());
     editAddPhoto.addEventListener('click', () => inputEditPhoto.click());
-    
+
     inputEditPhoto.addEventListener('change', (e) => {
         if (e.target.files[0]) {
             processImage(e.target.files[0], true);
@@ -511,7 +614,79 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Reminder & Settings Event Listeners
+    notificationToggle.addEventListener('change', () => {
+        if (notificationToggle.checked) {
+            if (!('Notification' in window)) {
+                showToast("お使いの端末は通知に対応していません");
+                notificationToggle.checked = false;
+                return;
+            }
+
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    localStorage.setItem('notification_enabled', 'true');
+                    const savedTime = localStorage.getItem('notification_time') || '21:00';
+                    localStorage.setItem('notification_time', savedTime);
+                    showToast("通知を有効にしました");
+                    updateNotificationStatusUI();
+
+                    // Show a test notification
+                    showLocalNotification("Observe", "リマインダーを有効にしました。毎日 " + savedTime + " に通知します。");
+                } else {
+                    showToast("通知が許可されませんでした");
+                    notificationToggle.checked = false;
+                    localStorage.setItem('notification_enabled', 'false');
+                    updateNotificationStatusUI();
+                }
+            });
+        } else {
+            localStorage.setItem('notification_enabled', 'false');
+            showToast("通知を無効にしました");
+            updateNotificationStatusUI();
+        }
+    });
+
+    notificationTimeSelect.addEventListener('change', () => {
+        const time = notificationTimeSelect.value;
+        localStorage.setItem('notification_time', time);
+        showToast("リマインダー時間を " + time + " に設定しました");
+
+        // Show test notification with new time
+        if (localStorage.getItem('notification_enabled') === 'true') {
+            showLocalNotification("Observe", "通知時間を " + time + " に変更しました。");
+        }
+    });
+
+    inAppReminderToggle.addEventListener('change', () => {
+        localStorage.setItem('in_app_reminder_enabled', inAppReminderToggle.checked ? 'true' : 'false');
+        showToast(inAppReminderToggle.checked ? "アプリ内リマインダーを有効にしました" : "アプリ内リマインダーを無効にしました");
+        checkInAppReminder();
+    });
+
+    closeReminderBanner.addEventListener('click', () => {
+        inAppReminderBanner.style.display = 'none';
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const today = `${year}-${month}-${day}`;
+        localStorage.setItem('in_app_reminder_dismissed_date', today);
+    });
+
     // --- Initialize ---
     currentTheme = getTodayTheme();
     themeDisplay.innerHTML = currentTheme;
+
+    // Check in-app reminder status at launch
+    checkInAppReminder();
 });
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+            .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+            .catch((err) => console.error('Service Worker registration failed:', err));
+    });
+}

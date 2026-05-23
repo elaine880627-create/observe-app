@@ -6,6 +6,17 @@
     <title>Observe | 観察する</title>
     <meta name="description" content="日常を再発見するための、静かな観察アプリ。">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    
+    <!-- iOS / Safari PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Observe">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 </head>
 <body>
     <div class="app-container">
@@ -31,6 +42,10 @@
 
         <!-- Home Screen -->
         <section id="home-screen" class="screen hidden">
+            <div id="in-app-reminder-banner" class="in-app-reminder-banner" style="display: none;">
+                <span>今日の観察テーマを見てみましょう</span>
+                <button id="close-reminder-banner" class="btn-close-banner" aria-label="閉じる">✕</button>
+            </div>
             <main class="theme-section">
                 <p class="theme-label">今日の観察テーマ</p>
                 <div class="theme-card">
@@ -51,6 +66,53 @@
             </div>
         </section>
 
+        <!-- Settings Screen -->
+        <section id="settings-screen" class="screen hidden">
+            <div class="settings-content">
+                <h2 class="serif" style="font-size: 1.4rem; margin-bottom: var(--spacing-m); letter-spacing: 0.1em; color: var(--text-main);">Reminders</h2>
+                
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <div>
+                            <p class="settings-item-title">毎日の通知リマインダー</p>
+                            <p class="settings-item-desc">指定した時間に観察を促す通知を送ります。</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notification-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="settings-row" id="notification-time-row" style="display: none;">
+                        <p class="settings-item-title">通知時間</p>
+                        <select id="notification-time-select" class="settings-select">
+                            <option value="09:00">朝の観察 (09:00)</option>
+                            <option value="12:00">昼の観察 (12:00)</option>
+                            <option value="21:00">夜の観察 (21:00)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Notification Status/iOS Alert Banner -->
+                <div id="settings-status-box" class="settings-status-box" style="display: none;">
+                    <p id="settings-status-text"></p>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <div>
+                            <p class="settings-item-title">アプリ内リマインダー表示</p>
+                            <p class="settings-item-desc">通知が届かない場合でも、アプリ起動時に穏やかな通知を表示します。</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="in-app-reminder-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Bottom Navigation -->
         <nav id="bottom-nav" class="bottom-nav hidden">
             <div class="nav-item active" data-screen="home">
@@ -60,6 +122,10 @@
             <div class="nav-item" data-screen="history">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16m-7 6h7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span>履歴</span>
+            </div>
+            <div class="nav-item" data-screen="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>設定</span>
             </div>
         </nav>
 
@@ -99,7 +165,7 @@
             <div class="preview-content">
                 <p class="preview-theme-label">観察テーマ</p>
                 <p id="preview-theme-text" class="preview-theme-text serif"></p>
-                <textarea id="memo-input" class="record-input" placeholder="今日の観察を書いてください"></textarea>
+                <textarea id="memo-input" class="record-input" placeholder="今日の気づきを書いてください"></textarea>
                 <button id="save-observation" class="btn-save">保存する</button>
             </div>
         </div>
@@ -127,7 +193,7 @@
                     <p id="edit-date" style="font-size: 0.7rem; color: var(--text-sub);"></p>
                 </div>
                 <p id="edit-theme-text" class="preview-theme-text serif"></p>
-                <textarea id="edit-memo-input" class="record-input" placeholder="今日の観察を書いてください"></textarea>
+                <textarea id="edit-memo-input" class="record-input" placeholder="今日の気づきを書いてください"></textarea>
                 <button id="save-edit-observation" class="btn-save">保存する</button>
             </div>
         </div>
